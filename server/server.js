@@ -1,61 +1,62 @@
+// const express = require('express');
+// const path = require('path');
+// require('dotenv').config();
 
-// const express = require("express");
-// const path = require("path");
-// const { MongoClient } = require("mongodb");
-// require("dotenv").config();
+// // Import database connection and User model
+// const db = require('./db/db.js');
+// const User = require('./model/user-model.js');
 
 // const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// // MongoDB Configuration
-// const MONGO_URL = process.env.MONGODB_URL || "mongodb://localhost:27017";
-// const DB_NAME = "Testing-db";
+// const port = process.env.PORT || 5000;
 
 // // Middleware
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
-// app.use(express.static(path.join(__dirname, "src", "web")));
 
-// // MongoDB Client
-// const client = new MongoClient(MONGO_URL);
+// app.use(express.static(path.join(__dirname, 'src', 'web')));
 
 // // ============= ROUTES =============
 
-// // Home route
-// app.get("/", (req, res) => {
+// // 1. GET: Home route
+// app.get('/', (req, res) => {
+//   console.log('GET / request received');
 //   res.send(`
-//     <h1>Hello from Express Server!</h1>
+//     <h1>Hello from the Simple Express Server!</h1>
 //     <p>Available routes:</p>
 //     <ul>
-//       <li><a href="/data">GET /data</a> - Server info</li>
+//       <li><a href="/data">GET /data</a> - Get server info</li>
 //       <li><a href="/users">GET /users</a> - Get all users</li>
-//       <li><a href="/frontend">GET /frontend</a> - Registration Form</li>
+//       <li><a href="/frontend">GET /frontend</a> - User Registration Form</li>
 //     </ul>
 //   `);
 // });
 
-// // Server data endpoint
-// app.get("/data", (req, res) => {
+// // 2. GET: Server data endpoint
+// app.get('/data', (req, res) => {
+//   console.log('GET /data request received');
 //   const serverData = {
-//     status: "success",
-//     message: "Data retrieved successfully",
+//     status: 'success',
+//     message: 'Data retrieved successfully',
 //     timestamp: new Date().toISOString(),
-//     version: "2.3"
+//     version: '2.3',
+//     environment: process.env.NODE_ENV || 'development'
 //   };
 //   res.json(serverData);
 // });
 
-// // Frontend form
-// app.get("/frontend", (req, res) => {
-//   res.sendFile(path.join(__dirname, "src", "web", "index.html"));
+// // 3. GET: Frontend form
+// // ✅ FIXED: Correct path to HTML file
+// app.get('/frontend', (req, res) => {
+//   console.log('GET /frontend request received');
+//   res.sendFile(path.join(__dirname, 'src', 'web', 'index.html'));
 // });
 
 // // ============= CRUD OPERATIONS =============
 
 // // CREATE - POST: Add new user
-// app.post("/users", async (req, res) => {
-//   console.log("POST /users request received");
-//   console.log("Request body:", req.body);
+// app.post('/users', async (req, res) => {
+//   console.log('POST /users request received');
+//   console.log('Request body:', req.body);
 
 //   try {
 //     const { name, gmail, password } = req.body;
@@ -63,45 +64,34 @@
 //     // Validation
 //     if (!name || !gmail || !password) {
 //       return res.status(400).json({
-//         status: "error",
-//         message: "Please provide name, gmail, and password"
+//         status: 'error',
+//         message: 'Please provide name, gmail, and password'
 //       });
 //     }
-
-//     // Connect to MongoDB
-//     await client.connect();
-//     const db = client.db(DB_NAME);
-//     const usersCollection = db.collection("users");
 
 //     // Check if user already exists
-//     const existingUser = await usersCollection.findOne({ gmail });
+//     const existingUser = await User.findOne({ gmail });
 //     if (existingUser) {
-//       await client.close();
 //       return res.status(400).json({
-//         status: "error",
-//         message: "User with this email already exists"
+//         status: 'error',
+//         message: 'User with this email already exists'
 //       });
 //     }
 
-//     // Create user object
-//     const newUser = {
+//     // Create new user
+//     const newUser = new User({
 //       name,
-//       gmail: gmail.toLowerCase(),
-//       password,
-//       createdAt: new Date()
-//     };
+//       gmail,
+//       password
+//     });
 
-//     // Insert user
-//     const result = await usersCollection.insertOne(newUser);
-//     console.log("User inserted:", result.insertedId);
-
-//     await client.close();
+//     await newUser.save();
 
 //     res.status(201).json({
-//       status: "success",
-//       message: "User created successfully",
+//       status: 'success',
+//       message: 'User created successfully',
 //       data: {
-//         id: result.insertedId,
+//         id: newUser._id,
 //         name: newUser.name,
 //         gmail: newUser.gmail,
 //         createdAt: newUser.createdAt
@@ -109,209 +99,136 @@
 //     });
 
 //   } catch (error) {
-//     console.error("Error creating user:", error);
-//     await client.close();
+//     console.error('Error creating user:', error);
 //     res.status(500).json({
-//       status: "error",
-//       message: "Error creating user",
+//       status: 'error',
+//       message: 'Error creating user',
 //       error: error.message
 //     });
 //   }
 // });
 
 // // READ - GET: Get all users
-// app.get("/users", async (req, res) => {
-//   console.log("GET /users request received");
+// app.get('/users', async (req, res) => {
+//   console.log('GET /users request received');
 
 //   try {
-//     await client.connect();
-//     const db = client.db(DB_NAME);
-//     const usersCollection = db.collection("users");
-
-//     // Get all users (excluding password)
-//     const users = await usersCollection
-//       .find({})
-//       .project({ password: 0 })  // Exclude password field
-//       .sort({ createdAt: -1 })   // Sort by newest first
-//       .toArray();
-
-//     await client.close();
-
+//     const users = await User.find().select('-password').sort({ createdAt: -1 });
+    
 //     res.json({
-//       status: "success",
+//       status: 'success',
 //       count: users.length,
 //       data: users
 //     });
 
 //   } catch (error) {
-//     console.error("Error fetching users:", error);
-//     await client.close();
+//     console.error('Error fetching users:', error);
 //     res.status(500).json({
-//       status: "error",
-//       message: "Error fetching users",
+//       status: 'error',
+//       message: 'Error fetching users',
 //       error: error.message
 //     });
 //   }
 // });
 
 // // READ - GET: Get single user by ID
-// app.get("/users/:id", async (req, res) => {
-//   console.log("GET /users/:id request received");
+// app.get('/users/:id', async (req, res) => {
+//   console.log('GET /users/:id request received');
 
 //   try {
-//     const { ObjectId } = require("mongodb");
-//     const userId = req.params.id;
-
-//     // Validate ObjectId
-//     if (!ObjectId.isValid(userId)) {
-//       return res.status(400).json({
-//         status: "error",
-//         message: "Invalid user ID"
-//       });
-//     }
-
-//     await client.connect();
-//     const db = client.db(DB_NAME);
-//     const usersCollection = db.collection("users");
-
-//     const user = await usersCollection.findOne(
-//       { _id: new ObjectId(userId) },
-//       { projection: { password: 0 } }  // Exclude password
-//     );
-
-//     await client.close();
-
+//     const user = await User.findById(req.params.id).select('-password');
+    
 //     if (!user) {
 //       return res.status(404).json({
-//         status: "error",
-//         message: "User not found"
+//         status: 'error',
+//         message: 'User not found'
 //       });
 //     }
 
 //     res.json({
-//       status: "success",
+//       status: 'success',
 //       data: user
 //     });
 
 //   } catch (error) {
-//     console.error("Error fetching user:", error);
-//     await client.close();
+//     console.error('Error fetching user:', error);
 //     res.status(500).json({
-//       status: "error",
-//       message: "Error fetching user",
+//       status: 'error',
+//       message: 'Error fetching user',
 //       error: error.message
 //     });
 //   }
 // });
 
 // // UPDATE - PUT: Update user by ID
-// app.put("/users/:id", async (req, res) => {
-//   console.log("PUT /users/:id request received");
+// app.put('/users/:id', async (req, res) => {
+//   console.log('PUT /users/:id request received');
 
 //   try {
-//     const { ObjectId } = require("mongodb");
-//     const userId = req.params.id;
 //     const { name, gmail, password } = req.body;
-
-//     // Validate ObjectId
-//     if (!ObjectId.isValid(userId)) {
-//       return res.status(400).json({
-//         status: "error",
-//         message: "Invalid user ID"
-//       });
-//     }
-
-//     // Build update object
 //     const updateData = {};
+
 //     if (name) updateData.name = name;
-//     if (gmail) updateData.gmail = gmail.toLowerCase();
+//     if (gmail) updateData.gmail = gmail;
 //     if (password) updateData.password = password;
-//     updateData.updatedAt = new Date();
 
-//     await client.connect();
-//     const db = client.db(DB_NAME);
-//     const usersCollection = db.collection("users");
+//     const updatedUser = await User.findByIdAndUpdate(
+//       req.params.id,
+//       updateData,
+//       { new: true, runValidators: true }
+//     ).select('-password');
 
-//     const result = await usersCollection.findOneAndUpdate(
-//       { _id: new ObjectId(userId) },
-//       { $set: updateData },
-//       { returnDocument: "after", projection: { password: 0 } }
-//     );
-
-//     await client.close();
-
-//     if (!result.value) {
+//     if (!updatedUser) {
 //       return res.status(404).json({
-//         status: "error",
-//         message: "User not found"
+//         status: 'error',
+//         message: 'User not found'
 //       });
 //     }
 
 //     res.json({
-//       status: "success",
-//       message: "User updated successfully",
-//       data: result.value
+//       status: 'success',
+//       message: 'User updated successfully',
+//       data: updatedUser
 //     });
 
 //   } catch (error) {
-//     console.error("Error updating user:", error);
-//     await client.close();
+//     console.error('Error updating user:', error);
 //     res.status(500).json({
-//       status: "error",
-//       message: "Error updating user",
+//       status: 'error',
+//       message: 'Error updating user',
 //       error: error.message
 //     });
 //   }
 // });
 
 // // DELETE - DELETE: Delete user by ID
-// app.delete("/users/:id", async (req, res) => {
-//   console.log("DELETE /users/:id request received");
+// app.delete('/users/:id', async (req, res) => {
+//   console.log('DELETE /users/:id request received');
 
 //   try {
-//     const { ObjectId } = require("mongodb");
-//     const userId = req.params.id;
+//     const deletedUser = await User.findByIdAndDelete(req.params.id);
 
-//     // Validate ObjectId
-//     if (!ObjectId.isValid(userId)) {
-//       return res.status(400).json({
-//         status: "error",
-//         message: "Invalid user ID"
-//       });
-//     }
-
-//     await client.connect();
-//     const db = client.db(DB_NAME);
-//     const usersCollection = db.collection("users");
-
-//     const result = await usersCollection.findOneAndDelete(
-//       { _id: new ObjectId(userId) }
-//     );
-
-//     await client.close();
-
-//     if (!result.value) {
+//     if (!deletedUser) {
 //       return res.status(404).json({
-//         status: "error",
-//         message: "User not found"
+//         status: 'error',
+//         message: 'User not found'
 //       });
 //     }
 
 //     res.json({
-//       status: "success",
-//       message: "User deleted successfully",
+//       status: 'success',
+//       message: 'User deleted successfully',
 //       data: {
-//         id: result.value._id,
-//         name: result.value.name
+//         id: deletedUser._id,
+//         name: deletedUser.name
 //       }
 //     });
 
 //   } catch (error) {
-//     console.error("Error deleting user:", error);
-//     await client.close();
+//     console.error('Error deleting user:', error);
 //     res.status(500).json({
-//       status: "error",
-//       message: "Error deleting user",
+//       status: 'error',
+//       message: 'Error deleting user',
 //       error: error.message
 //     });
 //   }
@@ -322,29 +239,29 @@
 // // 404 handler
 // app.use((req, res) => {
 //   res.status(404).json({
-//     status: "error",
-//     message: "Route not found"
+//     status: 'error',
+//     message: 'Route not found'
 //   });
 // });
 
 // // Global error handler
 // app.use((err, req, res, next) => {
-//   console.error("Server error:", err);
+//   console.error('Server error:', err);
 //   res.status(500).json({
-//     status: "error",
-//     message: "Internal server error"
+//     status: 'error',
+//     message: 'Internal server error',
+//     error: process.env.NODE_ENV === 'development' ? err.message : undefined
 //   });
 // });
 
 // // ============= START SERVER =============
 
-// app.listen(PORT, () => {
-//   console.log(`🚀 Server running on: http://localhost:${PORT}`);
-//   console.log(`📄 Frontend form: http://localhost:${PORT}/frontend`);
-//   console.log(`👥 View users: http://localhost:${PORT}/users`);
-//   console.log(`🗄️  Database: ${DB_NAME}`);
+// app.listen(port, () => {
+//   console.log(`🚀 Server is running at: http://localhost:${port}`);
+//   console.log(`📄 Frontend form: http://localhost:${port}/frontend`);
+//   console.log(`👥 View users: http://localhost:${port}/users`);
+//   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 // });
-
 
 //==============================================={TESTING}======================================================
 
