@@ -6,7 +6,7 @@ app.use(express.json());
 
 // 1. GET Request: The home route
 app.get('/', (req, res) => {
-  console.log('GET / request received');
+  console.log('GET / request receiveds');
   res.send('<h1>Hello from the Simple Express Server!</h1><p>Try accessing /api/data or posting JSON to /api/post-test</p>');
 });
 
