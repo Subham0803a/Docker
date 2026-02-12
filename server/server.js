@@ -13,7 +13,7 @@
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 
-// app.use(express.static(path.join(__dirname, 'src', 'web')));
+// app.use(express.static(path.join(__dirname, 'src', 'public')));
 
 // // ============= ROUTES =============
 
@@ -48,7 +48,7 @@
 // // ✅ FIXED: Correct path to HTML file
 // app.get('/frontend', (req, res) => {
 //   console.log('GET /frontend request received');
-//   res.sendFile(path.join(__dirname, 'src', 'web', 'index.html'));
+//   res.sendFile(path.join(__dirname, 'src', 'public', 'index.html'));
 // });
 
 // // ============= CRUD OPERATIONS =============
