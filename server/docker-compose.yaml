@@ -1,0 +1,63 @@
+# YAML file for MongoDB and Mongo Express without Volume
+
+# version: "3.8"
+
+# services:
+#   mongo:
+#     image: mongo
+#     # image: subham0803/testapp:latest
+#     ports:
+#       - 27017:27017
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: admin
+#       MONGO_INITDB_ROOT_PASSWORD: qwerty
+
+#   mongo-express:
+#     image: mongo-express
+#     ports:
+#       - 8081:8081
+    # environment:
+    #   ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+    #   ME_CONFIG_MONGODB_ADMINPASSWORD: qwerty
+    #   ME_CONFIG_MONGODB_URL: mongodb://admin:qwerty@mongo:27017/
+
+
+# YAML file for MongoDB and Mongo Express with Volume
+
+version: "3.8"
+
+services:
+  # 1. The Database
+  mongodb:
+    image: mongo
+    container_name: mongo-db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: qwerty
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+  # 2. The GUI
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-gui
+    ports:
+      - 8081:8081
+    # environment:
+    #   ME_CONFIG_MONGODB_URL: mongodb://admin:qwerty@mongo-db:27017/
+    #   ME_CONFIG_BASICAUTH_USERNAME: admin
+    #   ME_CONFIG_BASICAUTH_PASSWORD: pass
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: qwerty
+      ME_CONFIG_MONGODB_URL: mongodb://admin:qwerty@mongo-db:27017/
+    depends_on:
+      - mongodb
+    restart: always
+
+# 3. The Shared Volume
+volumes:
+  mongo-data:
