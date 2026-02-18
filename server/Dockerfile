@@ -3,16 +3,11 @@
 
 FROM node:20
 
-# Set working directory
 ENV MONGO_DB_USERNAME=admin \
     MONGO_DB_PASSWORD=qwerty
 
-RUN mkdir -p testapp
+RUN mkdir -p app
 
-WORKDIR /app
+COPY . /app
 
-COPY . /testapp
-
-RUN npm install
-
-CMD ["node", "/testapp/server.js"]
+CMD ["node", "/app/server.js"]
